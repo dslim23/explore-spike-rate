@@ -113,7 +113,7 @@ if neurons_to_display and blocks:
                 mean = np.mean(filtered, axis=0)[np.newaxis,]
 
                 std_.append(std)
-                mean_.append(std)
+                mean_.append(mean)
             filtered_.append(filtered)
             dividers.append(dividers[-1] + filtered.shape[0])
         if 'Data' in display_ctrl:
