@@ -35,7 +35,7 @@ def filter_spike_data(spike_data,
     return filtered
 
 
-def plot_one(data, summary, dividers):
+def plot_one(data, summary=False, dividers=None,x_tick_interval = 20, y_tick_interval=40, xlabel='Position'):
     data = np.vstack(data).squeeze()
 
     if data.ndim == 1:
@@ -49,17 +49,18 @@ def plot_one(data, summary, dividers):
         x_size = trial_n / 2
     fig, axes = plt.subplots(figsize=(10, x_size))
     sns.heatmap(data, ax=axes)
-    axes.set(xlabel='Position', ylabel='Trial')
-    x_step = 20
-    x_idx = list(range(0, distance_n, x_step)) + [distance_n]
+    axes.set(xlabel=xlabel, ylabel='Trial')
+
+    x_idx = list(range(0, distance_n, x_tick_interval)) + [distance_n] if x_tick_interval else []
     axes.set_xticks(x_idx)
     axes.set_xticklabels(x_idx)
-    y_step = 40
-    y_idx = list(range(y_step, trial_n, y_step))
+
+    y_idx = list(range(y_tick_interval, trial_n, y_tick_interval)) if y_tick_interval else []
+
     axes.set_yticks(y_idx)
     axes.set_yticklabels(y_idx)
-    dividers = dividers[1:-1]
     if dividers:
+        dividers = dividers[1:-1]
         axes.hlines(dividers,
                     *axes.get_xlim(),
                     colors='white',
@@ -67,7 +68,7 @@ def plot_one(data, summary, dividers):
 
     st.pyplot(fig)
     return trial_n, fig, dividers, distance_n
-
+st.title('Firing Rate Visualizer')
 data_file = st.sidebar.file_uploader('Upload .mat file', type='.mat')
 if data_file:
     spike_data, trial_idx, kilosort_neuron_id = load_data(data_file)
@@ -79,9 +80,10 @@ if data_file:
                                         range(1, neuron_n + 1),
                                         default=range(1, neuron_n + 1))
     blocks = st.multiselect('Block', range(1, block_n + 1), default=1)
-    display_ctrl = st.sidebar.selectbox('Display',
-                                        ['Data', 'Data + Mean/Std', 'Mean/Std'],
-                                        index=1)
+
+    show_position_chart = st.sidebar.checkbox('Show position chart', value=True)
+    show_distance_chart = st.sidebar.checkbox('Show distance chart', value=True)
+    show_mean_std = st.sidebar.checkbox('Show mean and std per block', value=False)
 
     run = st.button('Run')
 
@@ -106,7 +108,7 @@ if data_file:
                                             neuron=neuron_,
                                             block=block_)
                 filtered = filtered.squeeze()
-                if 'Mean/Std' in display_ctrl:
+                if show_mean_std:
                     std = np.std(filtered, axis=0)[np.newaxis, ]
                     mean = np.mean(filtered, axis=0)[np.newaxis, ]
 
@@ -114,12 +116,16 @@ if data_file:
                     mean_.append(mean)
                 filtered_.append(filtered)
                 dividers.append(dividers[-1] + filtered.shape[0])
-            if 'Data' in display_ctrl:
+            if show_position_chart:
+                st.header(f'Position')
                 trial_n, fig, dividers, distance_n = plot_one(
                     filtered_, False, dividers)
-
+            if show_distance_chart:
+                st.header(f'Distance')
+                flattened = [f.flatten() for f in filtered_]
+                plot_one(flattened, True, x_tick_interval = None, y_tick_interval=None, xlabel='Distance')
             #STD
-            if 'Mean/Std' in display_ctrl:
+            if show_mean_std:
                 st.subheader('Mean per block')
                 trial_n, fig, dividers, distance_n = plot_one(
                     mean_, True, dividers)
