@@ -83,11 +83,11 @@ neurons_to_display = st.multiselect('Neurons',
 blocks = st.multiselect('Block', range(1, block_n + 1), default=1)
 display_ctrl = st.sidebar.selectbox('Display', ['Data', 'Data + Mean/Std', 'Mean/Std'], index=1)
 
+run = st.button('Run')
 
 
 
-
-if neurons_to_display and blocks:
+if run and neurons_to_display and blocks:
     neurons_to_display_n = len(neurons_to_display)
     blocks_n = len(blocks)
     chart_n = neurons_to_display_n * blocks_n
@@ -126,3 +126,4 @@ if neurons_to_display and blocks:
             st.subheader('Standard deviation per block')
 
             trial_n, fig, dividers, distance_n = plot_one(std_, True, dividers)
+        pbar.progress((i+1)/neurons_to_display_n)
