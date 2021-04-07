@@ -78,8 +78,8 @@ neuron_n, trial_n, timebins_per_trial = spike_data.shape
 trial_idx.append(trial_n)
 
 neurons_to_display = st.multiselect('Neurons',
-                                    range(1, neuron_n + 1),
-                                    default=range(1,6))
+                                    range(1, neuron_n+1),
+                                    default=range(1, neuron_n+1))
 blocks = st.multiselect('Block', range(1, block_n + 1), default=1)
 display_ctrl = st.sidebar.selectbox('Display', ['Data', 'Data + Mean/Std', 'Mean/Std'], index=1)
 
