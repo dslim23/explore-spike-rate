@@ -36,19 +36,20 @@ def filter_spike_data(spike_data,
 
     return filtered
 
+
 def plot_one(data, summary, dividers):
     data = np.vstack(data).squeeze()
 
     if data.ndim == 1:
-        data = data[np.newaxis,]
+        data = data[np.newaxis, ]
 
     trial_n, distance_n = data.shape
-    min_ = min(distance_n,trial_n)
-    x_size = trial_n/30
+    min_ = min(distance_n, trial_n)
+    x_size = trial_n / 30
 
     if summary:
-        x_size = trial_n/2
-    fig, axes = plt.subplots(figsize=(10,x_size))
+        x_size = trial_n / 2
+    fig, axes = plt.subplots(figsize=(10, x_size))
     sns.heatmap(data, ax=axes)
     axes.set(xlabel='Position', ylabel='Trial')
     x_step = 20
@@ -67,7 +68,8 @@ def plot_one(data, summary, dividers):
                     linestyles='dotted')
 
     st.pyplot(fig)
-    return trial_n,fig,dividers,distance_n
+    return trial_n, fig, dividers, distance_n
+
 
 data_path = st.sidebar.selectbox('Data file', data_paths)
 data_path = 'data/' + data_path
@@ -78,14 +80,14 @@ neuron_n, trial_n, timebins_per_trial = spike_data.shape
 trial_idx.append(trial_n)
 
 neurons_to_display = st.multiselect('Neurons',
-                                    range(1, neuron_n+1),
-                                    default=range(1, neuron_n+1))
+                                    range(1, neuron_n + 1),
+                                    default=range(1, neuron_n + 1))
 blocks = st.multiselect('Block', range(1, block_n + 1), default=1)
-display_ctrl = st.sidebar.selectbox('Display', ['Data', 'Data + Mean/Std', 'Mean/Std'], index=1)
+display_ctrl = st.sidebar.selectbox('Display',
+                                    ['Data', 'Data + Mean/Std', 'Mean/Std'],
+                                    index=1)
 
 run = st.button('Run')
-
-
 
 if run and neurons_to_display and blocks:
     neurons_to_display_n = len(neurons_to_display)
@@ -104,26 +106,28 @@ if run and neurons_to_display and blocks:
         for j, block_ in enumerate(blocks):
 
             filtered = filter_spike_data(spike_data,
-                                        trial_idx,
-                                        neuron=neuron_,
-                                        block=block_)
+                                         trial_idx,
+                                         neuron=neuron_,
+                                         block=block_)
             filtered = filtered.squeeze()
             if 'Mean/Std' in display_ctrl:
-                std = np.std(filtered, axis=0)[np.newaxis,]
-                mean = np.mean(filtered, axis=0)[np.newaxis,]
+                std = np.std(filtered, axis=0)[np.newaxis, ]
+                mean = np.mean(filtered, axis=0)[np.newaxis, ]
 
                 std_.append(std)
                 mean_.append(mean)
             filtered_.append(filtered)
             dividers.append(dividers[-1] + filtered.shape[0])
         if 'Data' in display_ctrl:
-            trial_n, fig, dividers, distance_n = plot_one(filtered_, False, dividers)
+            trial_n, fig, dividers, distance_n = plot_one(
+                filtered_, False, dividers)
 
         #STD
         if 'Mean/Std' in display_ctrl:
             st.subheader('Mean per block')
-            trial_n, fig, dividers, distance_n = plot_one(mean_, True, dividers)
+            trial_n, fig, dividers, distance_n = plot_one(
+                mean_, True, dividers)
             st.subheader('Standard deviation per block')
 
             trial_n, fig, dividers, distance_n = plot_one(std_, True, dividers)
-        pbar.progress((i+1)/neurons_to_display_n)
+        pbar.progress((i + 1) / neurons_to_display_n)
