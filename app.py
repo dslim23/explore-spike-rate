@@ -105,7 +105,7 @@ if data_file:
                                               value=True)
     show_mean_std = st.sidebar.checkbox('Show mean and std per block',
                                         value=False)
-    max_bins_filter = st.sidebar.slider('# of distance bins to show for distance chart', max_value = 2000, value=distbins_per_trial*3, step =int(distbins_per_trial/2))
+    max_bins_filter = st.sidebar.slider('# of distance bins to show for distance chart', max_value = 2000, value=distbins_per_trial*3, step =int(distbins_per_trial/4))
     run = st.button('Run')
 
     if run and neurons_to_display and blocks:
