@@ -41,7 +41,8 @@ def plot_one(data,
              dividers=None,
              x_tick_interval=20,
              y_tick_interval=40,
-             xlabel='Position', ylabel='Trial'):
+             xlabel='Position',
+             ylabel='Trial'):
     data = np.vstack(data).squeeze()
 
     if data.ndim == 1:
@@ -77,12 +78,17 @@ def plot_one(data,
     st.pyplot(fig)
     return trial_n, fig, dividers, distance_n
 
+
 def get_kilosort_d(kilosort_neuron_id):
-    return {i:id_ for i, id_ in enumerate(kilosort_neuron_id)},  {id_:i for i, id_ in enumerate(kilosort_neuron_id)}
+    return {i: id_
+            for i, id_ in enumerate(kilosort_neuron_id)
+            }, {id_: i
+                for i, id_ in enumerate(kilosort_neuron_id)}
 
 
 st.title('Firing Rate Visualizer')
 data_file = st.sidebar.file_uploader('Upload .mat file', type='.mat')
+use_kilosort_ids = st.sidebar.checkbox('Use kilosort ids')
 if data_file:
     spike_data, trial_idx, kilosort_neuron_id = load_data(data_file)
 
@@ -93,11 +99,17 @@ if data_file:
     id2kilosort, kilosort2id = get_kilosort_d(kilosort_neuron_id)
     kilosort_neuron_id.sort()
 
+    neuron_choices = kilosort_neuron_id if use_kilosort_ids else range(
+        1, neuron_n + 1)
+
     neurons_to_display = st.multiselect('Neurons',
-                                        kilosort_neuron_id,
-                                        default=kilosort_neuron_id)
-    neurons_to_display = [kilosort2id[n] for n in neurons_to_display]
-    blocks = st.multiselect('Block', range(1, block_n + 1), default=1)
+                                        neuron_choices,
+                                        default=range(45, 76))
+    if use_kilosort_ids:
+        neurons_to_display = [kilosort2id[n] for n in neurons_to_display]
+    blocks = st.multiselect('Block',
+                            range(1, block_n + 1),
+                            default=range(1, block_n + 1))
 
     show_position_chart = st.sidebar.checkbox('Show position chart',
                                               value=False)
@@ -105,7 +117,11 @@ if data_file:
                                               value=True)
     show_mean_std = st.sidebar.checkbox('Show mean and std per block',
                                         value=False)
-    max_bins_filter = st.sidebar.slider('# of distance bins to show for distance chart', max_value = 2000, value=distbins_per_trial*3, step =int(distbins_per_trial/4))
+    max_bins_filter = st.sidebar.slider(
+        '# of distance bins to show for distance chart',
+        max_value=2000,
+        value=distbins_per_trial * 3,
+        step=int(distbins_per_trial / 4))
     run = st.button('Run')
 
     if run and neurons_to_display and blocks:
@@ -117,7 +133,9 @@ if data_file:
 
         pbar = st.progress(0)
         for i, neuron_ in enumerate(neurons_to_display):
-            st.header(f'Neuron {id2kilosort[neuron_]}')
+            neuron_id = id2kilosort[neuron_] if use_kilosort_ids else neuron_
+
+            st.header(f'Neuron {neuron_id}')
             filtered_ = []
             std_ = []
             mean_ = []
@@ -144,18 +162,20 @@ if data_file:
             if show_distance_chart:
                 st.subheader(f'Distance')
 
-                flattened = [f.flatten()for f in filtered_]
+                flattened = [f.flatten() for f in filtered_]
                 min_bins = min([f.size for f in filtered_])
                 min_bins = min(max_bins_filter, min_bins)
-                flattened = [f.flatten()[:min_bins]for f in filtered_]
-                x_tick_interval = int(np.power(10,(np.floor(np.log10(min_bins)))))
+                flattened = [f.flatten()[:min_bins] for f in filtered_]
+                x_tick_interval = int(
+                    np.power(10, (np.floor(np.log10(min_bins)))))
                 #max_bins_filter = st.slider('Distance num timebins', max_value = max_bins, value=500)
                 #flattened = [f[:min(f.size,max_bins_filter)] for f in flattened]
                 plot_one(flattened,
                          True,
                          x_tick_interval=x_tick_interval,
                          y_tick_interval=1,
-                         xlabel='Distance', ylabel='Block')
+                         xlabel='Distance',
+                         ylabel='Block')
             #STD
             if show_mean_std:
                 st.subheader('Mean per block')
