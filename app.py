@@ -87,7 +87,7 @@ if data_file:
     spike_data, trial_idx, kilosort_neuron_id = load_data(data_file)
 
     block_n = len(trial_idx)
-    neuron_n, trial_n, timebins_per_trial = spike_data.shape
+    neuron_n, trial_n, distbins_per_trial = spike_data.shape
     trial_idx.append(trial_n)
 
     id2kilosort, kilosort2id = get_kilosort_d(kilosort_neuron_id)
@@ -100,12 +100,12 @@ if data_file:
     blocks = st.multiselect('Block', range(1, block_n + 1), default=1)
 
     show_position_chart = st.sidebar.checkbox('Show position chart',
-                                              value=True)
+                                              value=False)
     show_distance_chart = st.sidebar.checkbox('Show distance chart',
                                               value=True)
     show_mean_std = st.sidebar.checkbox('Show mean and std per block',
                                         value=False)
-    max_bins_filter = st.sidebar.slider('# of timebins to show for distance chart', max_value = 15000, value=timebins_per_trial*5, step =int(timebins_per_trial/2))
+    max_bins_filter = st.sidebar.slider('# of distance bins to show for distance chart', max_value = 2000, value=distbins_per_trial*3, step =int(distbins_per_trial/2))
     run = st.button('Run')
 
     if run and neurons_to_display and blocks:
